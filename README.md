@@ -9,7 +9,7 @@ to install the [Angular](https://angular.io) CLI.
 
 then navigate to the folder that contains this repo.
 
-run `ng server --open` to start it up.
+run `ng serve --open` to start it up.
 
 Reference the segment and node numbers in the diagram below.
 
