@@ -12,8 +12,8 @@ export class Orb {
   bestPath: number[][] = [];
 
   initializeOrb() {
-    this.segments = [];
     this.nodes = [];
+    this.segments = [];
 
     for (var i = 0; i < TOTAL_SEGMENTS; i++) {
       this.segments.push(new Segment(i));
@@ -207,16 +207,17 @@ export class Orb {
     var channel2path: number[] = [];
     var channel3path: number[] = [];
 
-    var startingSegments =
-      base?.segments.filter((s: Segment) => s.inSegment == null && s.lit) ?? [];
+    var startingSegments = this.segments.filter(s => s.lit && !s.inSegment);
+    if (startingSegments.length > 4) throw new Error("more than 4 starting segments");
+    //?.segments.filter((s: Segment) => s.inSegment == null && s.lit) ?? [];
     if (startingSegments[0])
-      channel0path = this.getPath(startingSegments[0], []);
+      channel0path = this.getPath(startingSegments[0], [startingSegments[0].id]);
     if (startingSegments[1])
-      channel1path = this.getPath(startingSegments[1], []);
+      channel1path = this.getPath(startingSegments[1], [startingSegments[1].id]);
     if (startingSegments[2])
-      channel2path = this.getPath(startingSegments[2], []);
+      channel2path = this.getPath(startingSegments[2], [startingSegments[2].id]);
     if (startingSegments[3])
-      channel3path = this.getPath(startingSegments[3], []);
+      channel3path = this.getPath(startingSegments[3], [startingSegments[3].id]);
     return [channel0path, channel1path, channel2path, channel3path];
   }
 
@@ -227,7 +228,6 @@ export class Orb {
   }
 
   getNextSegmentId(): number[] {
-    let returnSegment!: Segment;
     let segToExtend!: Segment;
     var returnSegmentId = -1;
     // find shortest path
