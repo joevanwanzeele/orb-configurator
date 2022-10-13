@@ -13,6 +13,7 @@ export class AppComponent {
   randomStartNode = false;
   maxAttempts = 1000;
   attempts = 0;
+  score = 0;
   title = 'orb path';
   generating = false;
 
@@ -24,17 +25,8 @@ export class AppComponent {
     return this.orb.mostLit;
   }
 
-  get bestPath0(): number[] {
-    return this.orb.bestPath[0] ?? [];
-  }
-  get bestPath1(): number[] {
-    return this.orb.bestPath[1] ?? [];
-  }
-  get bestPath2(): number[] {
-    return this.orb.bestPath[2] ?? [];
-  }
-  get bestPath3(): number[] {
-    return this.orb.bestPath[3] ?? [];
+  get bestPath(): number[][] {
+    return this.orb.bestPath;
   }
 
   resetOrb() {
@@ -46,18 +38,29 @@ export class AppComponent {
   }
 
   findSolution() {
+    console.log("are we generating yet?... ", this.generating)
+    this.generating = true;
+
     this.orb.initializeOrb();
     this.attempts = 0;
-    this.generating = true;
-    while (!this.allLit && this.attempts < this.maxAttempts) {
+    console.log("about to attempt ", this.maxAttempts, " iterations");
 
-      this.orb.getBestPaths(0);
-      this.orb.allLit = this.orb.allLit;
+    console.log("are we generating now?... ", this.generating)
 
+    var runit = new Promise(() => {
+      while (!this.allLit && this.attempts < this.maxAttempts) {
+        this.orb.getBestPaths(this.startingNode);
+        this.orb.allLit = this.orb.allLit;
+  
+        console.log('attempt: ', this.attempts);
+        this.attempts++;
+      }
+    });
+
+    runit.then(() => {
+      this.generating = false;
       console.log('attempt: ', this.attempts);
-      this.attempts++;
-    }
-    this.generating = false;
-    console.log('attempt: ', this.attempts);
+      console.log(this.orb.bestPath[1]);
+    });
   }
 }
