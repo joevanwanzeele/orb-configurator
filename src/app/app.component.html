@@ -56,7 +56,7 @@
       <mat-card-title>Best effort</mat-card-title>
       <mat-list role="list">
         <mat-list-item role="listitem" *ngFor="let channelNumber of [0,1,2,3]">
-          <mat-label color="accent">Channel {{ channelNumber }}</mat-label><div class="pathGroup"><div class="segId" *ngFor="let segmentIndex of orb.bestPath[channelNumber]">{{segmentIndex}}</div></div>
+          <mat-label color="accent" style="font-weight:bold;">Channel {{ channelNumber }}</mat-label><div class="pathGroup"><div class="segId" *ngFor="let segmentIndex of orb.bestPath[channelNumber]">-{{segmentIndex}}-</div></div>
         </mat-list-item>
       </mat-list>
       <mat-card-footer>

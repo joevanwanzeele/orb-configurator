@@ -192,7 +192,7 @@ export class Orb {
     var total = this.totalLit();
     console.log('total lit this attempt: ', this.totalLit());
     console.log('most lit so far: ', this.mostLit);
-    if (total > this.mostLit) {
+    if (total >= this.mostLit) {
       //new best path
       this.mostLit = total;
       this.bestPath = this.getPaths();

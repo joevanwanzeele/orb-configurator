@@ -36,6 +36,15 @@ export class AppComponent {
     console.log('nodes: ', this.orb.nodes);
     console.log('segments: ', this.orb.segments);
   }
+  runit = new Promise(() => {
+    while (!this.allLit && this.attempts < this.maxAttempts) {
+      this.orb.getBestPaths(this.startingNode);
+      this.orb.allLit = this.orb.allLit;
+
+      console.log('attempt: ', this.attempts);
+      this.attempts++;
+    }
+  });
 
   findSolution() {
     console.log("are we generating yet?... ", this.generating)
@@ -47,7 +56,7 @@ export class AppComponent {
 
     console.log("are we generating now?... ", this.generating)
 
-    var runit = new Promise(() => {
+    var runit = new Promise((done) => {
       while (!this.allLit && this.attempts < this.maxAttempts) {
         this.orb.getBestPaths(this.startingNode);
         this.orb.allLit = this.orb.allLit;
@@ -55,12 +64,12 @@ export class AppComponent {
         console.log('attempt: ', this.attempts);
         this.attempts++;
       }
+      done(this.orb.bestPath);
     });
 
-    runit.then(() => {
+    runit.then((bestPath) => {
       this.generating = false;
-      console.log('attempt: ', this.attempts);
-      console.log(this.orb.bestPath[1]);
+      console.log(bestPath);
     });
   }
 }
