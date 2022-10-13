@@ -4,11 +4,12 @@
     background: #eee !important;
   }
 
-  .mat-card-container, .mat-content-container {
+  .mat-card-container,
+  .mat-content-container {
     background: #eee !important;
   }
 
-  .mat-content-container{
+  .mat-content-container {
     height: 100%;
   }
 
@@ -22,8 +23,8 @@
     width: 80%;
   }
 
-  .mat-form-field{
-    margin-right:1em;
+  .mat-form-field {
+    margin-right: 1em;
   }
 
   .pathGroup {
@@ -32,7 +33,7 @@
   }
 
   .segId {
-    margin-left:1em;
+    margin-left: 1em;
   }
 </style>
 
@@ -61,7 +62,7 @@
       </mat-card-content>
       <mat-divider inset></mat-divider>
       <mat-card-actions *ngIf="!generating" color="accent">
-        <button mat-button (click)="findSolution()" >GENERATE AND EVALUATE</button>
+        <button mat-button (click)="findSolution()">GENERATE AND EVALUATE</button>
       </mat-card-actions>
       <mat-card-footer>
         <h4>{{attempts}} patterns evaluated.</h4>
@@ -77,14 +78,16 @@
         <mat-list-item role="listitem" *ngFor="let channelNumber of [0,1,2,3]">
           <mat-label color="accent" style="font-weight:bold;height: 2.5em;">Channel {{ channelNumber }}</mat-label>
           <div class="pathGroup">
-            <div class="segId" *ngFor="let segmentIndex of orb.bestPath[channelNumber]"><mat-icon [matBadge]="segmentIndex"></mat-icon></div>
+            <div class="segId" *ngFor="let segmentIndex of orb.bestPath[channelNumber]">
+              <mat-icon [matBadge]="segmentIndex"></mat-icon>
+            </div>
           </div>
         </mat-list-item>
       </mat-list>
       <mat-card-footer>
         <mat-progress-bar *ngIf="generating == true" mode="determinate" [value]="(maxLit / orb.segments.length * 100)">
         </mat-progress-bar>
-        <br/>
+        <br />
         <h6>{{allLit ? "Huzzah!" : "Not there yet."}}</h6>
       </mat-card-footer>
     </mat-card>

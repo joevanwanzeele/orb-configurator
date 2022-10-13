@@ -14,10 +14,10 @@ export class AppComponent {
   maxAttempts = 1000;
   attempts = 0;
   score = 0;
-  title = 'orb path';
+  title = 'brute force orb path finder.';
   generating = false;
-
   allLit = false;
+
   get totalLit(): number {
     return this.orb.totalLit();
   }
@@ -36,32 +36,17 @@ export class AppComponent {
     console.log('nodes: ', this.orb.nodes);
     console.log('segments: ', this.orb.segments);
   }
-  runit = new Promise(() => {
-    while (!this.allLit && this.attempts < this.maxAttempts) {
-      this.orb.getBestPaths(this.startingNode);
-      this.orb.allLit = this.orb.allLit;
-
-      console.log('attempt: ', this.attempts);
-      this.attempts++;
-    }
-  });
 
   findSolution() {
-    console.log("are we generating yet?... ", this.generating)
     this.generating = true;
 
     this.orb.initializeOrb();
     this.attempts = 0;
-    console.log("about to attempt ", this.maxAttempts, " iterations");
-
-    console.log("are we generating now?... ", this.generating)
 
     var runit = new Promise((done) => {
       while (!this.allLit && this.attempts < this.maxAttempts) {
         this.orb.getBestPaths(this.startingNode);
         this.orb.allLit = this.orb.allLit;
-  
-        console.log('attempt: ', this.attempts);
         this.attempts++;
       }
       done(this.orb.bestPath);

@@ -158,6 +158,7 @@ export class Orb {
     //init orb
     console.log('resetting orb..');
     console.log('next attempt, starting at hub/node ', startingNodeId);
+
     this.initializeOrb();
 
     //init channels
@@ -194,9 +195,50 @@ export class Orb {
     console.log('most lit so far: ', this.mostLit);
     if (total >= this.mostLit) {
       //new best path
-      this.mostLit = total;
-      this.bestPath = this.getPaths();
-      console.log('setting new max value: ', this.mostLit);
+      var newContender = this.getPaths();
+      var newerIsBetter = true;
+
+      if (total == this.mostLit) {
+        //they're equal
+        //let's also score them based on their relative length similarity
+        var maxCurrentLength = Math.max(
+          this.bestPath[0].length,
+          this.bestPath[1].length,
+          this.bestPath[2].length,
+          this.bestPath[3].length
+        );
+        var minCurrentLength = Math.min(
+          this.bestPath[0].length,
+          this.bestPath[1].length,
+          this.bestPath[2].length,
+          this.bestPath[3].length
+        );
+
+        var currentDisparity = maxCurrentLength - minCurrentLength;
+
+        var maxContenderLength = Math.max(
+          newContender[0].length,
+          newContender[1].length,
+          newContender[2].length,
+          newContender[3].length
+        );
+        var minContenderLength = Math.min(
+          newContender[0].length,
+          newContender[1].length,
+          newContender[2].length,
+          newContender[3].length
+        );
+
+        var latestDisparity = maxContenderLength - minContenderLength;
+
+        if (currentDisparity - latestDisparity < 0) newerIsBetter = false; //the latest has more length disparity (and is less desirable).
+      }
+
+      if (newerIsBetter) {
+        this.mostLit = total;
+        this.bestPath = newContender;
+        console.log('set new best path: ', this.bestPath);
+      }
     }
   }
 
