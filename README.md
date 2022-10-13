@@ -11,4 +11,9 @@ then navigate to the folder that contains this repo.
 
 run `ng server --open` to start it up.
 
-#### hail orb.
+Reference the segment and node numbers in the diagram below.
+
+![orb map](./orbmap.svg)
+
+
+###### hail orb.
