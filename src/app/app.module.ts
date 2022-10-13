@@ -13,6 +13,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatInputModule } from '@angular/material/input';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [AppComponent],
@@ -28,7 +30,9 @@ import { MatInputModule } from '@angular/material/input';
     MatButtonModule,
     MatListModule,
     MatToolbarModule,
-    MatInputModule
+    MatInputModule,
+    MatBadgeModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -201,23 +201,32 @@ export class Orb {
   }
 
   getPaths(): number[][] {
-    var base = this.nodes.find((n: Node) => n.isBase == true);
     var channel0path: number[] = [];
     var channel1path: number[] = [];
     var channel2path: number[] = [];
     var channel3path: number[] = [];
 
-    var startingSegments = this.segments.filter(s => s.lit && !s.inSegment);
-    if (startingSegments.length > 4) throw new Error("more than 4 starting segments");
-    //?.segments.filter((s: Segment) => s.inSegment == null && s.lit) ?? [];
+    var startingSegments = this.segments.filter((s) => s.lit && !s.inSegment);
+
+    if (startingSegments.length > 4)
+      throw new Error('more than 4 starting segments');
+
     if (startingSegments[0])
-      channel0path = this.getPath(startingSegments[0], [startingSegments[0].id]);
+      channel0path = this.getPath(startingSegments[0], [
+        startingSegments[0].id,
+      ]);
     if (startingSegments[1])
-      channel1path = this.getPath(startingSegments[1], [startingSegments[1].id]);
+      channel1path = this.getPath(startingSegments[1], [
+        startingSegments[1].id,
+      ]);
     if (startingSegments[2])
-      channel2path = this.getPath(startingSegments[2], [startingSegments[2].id]);
+      channel2path = this.getPath(startingSegments[2], [
+        startingSegments[2].id,
+      ]);
     if (startingSegments[3])
-      channel3path = this.getPath(startingSegments[3], [startingSegments[3].id]);
+      channel3path = this.getPath(startingSegments[3], [
+        startingSegments[3].id,
+      ]);
     return [channel0path, channel1path, channel2path, channel3path];
   }
 
@@ -241,19 +250,12 @@ export class Orb {
 
     //of those, select one with the shortest path to the base
     pathEnds = _.orderBy(pathEnds, 'pathPosition');
-    //console.log("path end segments, ordered by distance from base: ", pathEnds)
-    // console.log(
-    //   'length of path end segments.. should always be 4; right?',
-    //   pathEnds.length
-    // );
+
     let attemptedIdx = -1;
 
     while (returnSegmentId == -1 && attemptedIdx < --pathEnds.length) {
       attemptedIdx++;
       segToExtend = pathEnds[attemptedIdx] as Segment;
-      // console.log("attemptedIdx: ", attemptedIdx);
-      // console.log("pathEnds: ", pathEnds);
-      // console.log("segtoextend: ", pathEnds[attemptedIdx])
       var nodeOptions = segToExtend.nodes.filter(
         (n) => !n.isBase && segToExtend.inSegment == null
       ); // for the first segment, we just need to select the node that isn't the base
@@ -267,7 +269,6 @@ export class Orb {
 
       if (nextNode != null) {
         var options = nextNode.segments.filter((s) => !s.lit);
-
         //select next segment from available non-lit segments at the outnode
         //if none available, try pathEnds[+1]
         if (options.length > 0) returnSegmentId = _.sample(options)?.id ?? -1;
@@ -288,7 +289,7 @@ export class Orb {
 }
 
 export class Node {
-  isBase?: boolean; // is it where the controller connects?
+  isBase?: boolean; // where the controller connects and outputs it's channels
   id: number;
   hubType?: HubType;
   segments: Segment[] = [];
@@ -320,23 +321,26 @@ export class Segment {
   nodes: Node[] = [];
   inSegment?: Segment;
   outSegment?: Segment;
+
   private _lit = false;
-  private _pathPosition = -1;
   public set lit(isLit: boolean) {
     this._lit = isLit;
   }
   public get lit() {
     return this._lit || (this.inSegment != null && this.inSegment.lit);
   }
-  constructor(idx: number) {
-    this.id = idx;
-  }
+
+  private _pathPosition = -1;
   public get pathPosition(): number {
     if (this.inSegment) return this.inSegment.pathPosition + 1;
     return this._pathPosition;
   }
   public set pathPosition(p: number) {
     this._pathPosition = p;
+  }
+
+  constructor(idx: number) {
+    this.id = idx;
   }
 }
 
@@ -347,6 +351,5 @@ export class OrbPathConfiguration {
   public channel3Path: number[] = [];
 
   public litSegmentIds: number[] = [];
-
   public startingNode: number = -1;
 }
