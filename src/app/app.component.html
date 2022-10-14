@@ -83,6 +83,12 @@
             </div>
           </div>
         </mat-list-item>
+        <mat-list-item>
+          <mat-label color="accent" style="font-weight:bold;height: 2.5em;">Un-Lit</mat-label>
+          <div class="segId" *ngFor="let segmentId of unlitSegments">
+            <mat-icon [matBadge]="segmentId" color="accent"></mat-icon>
+          </div>
+        </mat-list-item>
       </mat-list>
       <mat-card-footer>
         <mat-progress-bar *ngIf="generating == true" mode="determinate" [value]="(maxLit / orb.segments.length * 100)">

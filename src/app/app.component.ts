@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import * as _ from 'lodash';
-import { Orb } from '../app/models/orb.model';
+import { Orb, Segment } from '../app/models/orb.model';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +17,7 @@ export class AppComponent {
   title = 'brute force orb path finder.';
   generating = false;
   allLit = false;
+  unlitSegments:number[] = [];
 
   get totalLit(): number {
     return this.orb.totalLit();
@@ -46,7 +47,8 @@ export class AppComponent {
     var runit = new Promise((done) => {
       while (!this.allLit && this.attempts < this.maxAttempts) {
         this.orb.getBestPaths(this.startingNode);
-        this.orb.allLit = this.orb.allLit;
+        this.allLit = this.orb.allLit();
+        this.unlitSegments = this.orb.fewestUnlit;
         this.attempts++;
       }
       done(this.orb.bestPath);

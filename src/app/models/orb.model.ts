@@ -10,6 +10,7 @@ export class Orb {
   segments: Segment[] = [];
   mostLit: number = 0;
   bestPath: number[][] = [];
+  fewestUnlit: number[] = [];
 
   initializeOrb() {
     this.nodes = [];
@@ -207,6 +208,7 @@ export class Orb {
           this.bestPath[2].length,
           this.bestPath[3].length
         );
+
         var minCurrentLength = Math.min(
           this.bestPath[0].length,
           this.bestPath[1].length,
@@ -222,6 +224,7 @@ export class Orb {
           newContender[2].length,
           newContender[3].length
         );
+
         var minContenderLength = Math.min(
           newContender[0].length,
           newContender[1].length,
@@ -236,6 +239,7 @@ export class Orb {
 
       if (newerIsBetter) {
         this.mostLit = total;
+        this.fewestUnlit = this.unLit().map(u => u.id);
         this.bestPath = newContender;
         console.log('set new best path: ', this.bestPath);
       }
@@ -327,6 +331,10 @@ export class Orb {
 
   totalLit() {
     return this.segments.filter((s) => s.lit == true).length;
+  }
+
+  unLit(){
+    return this.segments.filter((s) => !s.lit)
   }
 }
 
