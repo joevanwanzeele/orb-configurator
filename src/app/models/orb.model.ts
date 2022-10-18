@@ -13,6 +13,14 @@ export class Orb {
   fewestUnlit: number[] = [];
   startingNodes: number[] = [];
 
+  resetOrb(){
+    this.bestPath = [];
+    this.bestPaths = new Map<number, number[][]>();
+    this.fewestUnlit = [];
+    this.startingNodes = [];
+    this.initializeOrb();
+  }
+
   initializeOrb() {
     this.nodes = [];
     this.segments = [];

@@ -33,11 +33,11 @@ export class AppComponent {
     console.log('resetting orb data');
     this.allLit = false;
     this.score = 0;
-    this.totalUnlitLeds = -1;
+    this.totalUnlitLeds = -1;    
     this.unlitSegments = [];
     this.bestPaths = new Map<number, number[][]>();
 
-    this.orb.initializeOrb();
+    this.orb.resetOrb();
     console.log('orb initialized');
     console.log('nodes: ', this.orb.nodes);
     console.log('segments: ', this.orb.segments);
