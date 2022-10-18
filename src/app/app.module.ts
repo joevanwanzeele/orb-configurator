@@ -16,9 +16,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatInputModule } from '@angular/material/input';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatIconModule } from '@angular/material/icon';
+import { OrbVisualizerComponent } from './orb-visualizer/orb-visualizer.component';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, OrbVisualizerComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

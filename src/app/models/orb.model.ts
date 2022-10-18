@@ -1,27 +1,28 @@
 import * as _ from 'lodash';
 
 export type HubType = 5 | 6;
-export type StripLength = 45 | 51;
-export const TOTAL_NODES = 26;
-export const TOTAL_SEGMENTS = 65;
+export const TOTAL_NODES = 42;
+export const TOTAL_SEGMENTS = 120;
 
 export class Orb {
-  nodes: Node[] = [];
-  segments: Segment[] = [];
+  nodes: OrbNode[] = [];
+  segments: OrbSegment[] = [];
   mostLit: number = 0;
   bestPath: number[][] = [];
+  bestPaths = new Map<number, number[][]>();
   fewestUnlit: number[] = [];
+  startingNodes: number[] =[];
 
   initializeOrb() {
     this.nodes = [];
     this.segments = [];
 
     for (var i = 0; i < TOTAL_SEGMENTS; i++) {
-      this.segments.push(new Segment(i));
+      this.segments.push(new OrbSegment(i));
     }
 
     for (var i = 0; i < TOTAL_NODES; i++) {
-      this.nodes.push(new Node(i));
+      this.nodes.push(new OrbNode(i));
     }
 
     var node0 = this.nodes[0];
@@ -153,27 +154,113 @@ export class Orb {
     node25.hubType = 6;
     node25.setNeighbors(this.nodes, 15, 6, 24, 16);
     node25.setSegments(this.segments, 54, 35, 63, 64, 37);
+
+    // bottom half
+
+    var node26 = this.nodes[26];
+    node26.hubType = 5;
+    node26.setNeighbors(this.nodes, 16, 25, 35, 27, 36);
+    node26.setSegments(this.segments, 65, 66, 85, 94, 96);
+
+    var node27 = this.nodes[27];
+    node27.hubType = 6;
+    node27.setNeighbors(this.nodes, 16, 17, 26, 28, 36, 37);
+    node27.setSegments(this.segments, 67, 68, 85, 86, 97, 98);
+
+    var node28 = this.nodes[28];
+    node28.hubType = 5;
+    node28.setNeighbors(this.nodes, 17, 18, 27, 29, 37);
+    node28.setSegments(this.segments, 69, 70, 86, 87, 99);
+
+    var node29 = this.nodes[29];
+    node29.hubType = 6;
+    node29.setNeighbors(this.nodes, 18, 19, 28, 30, 37, 38);
+    node29.setSegments(this.segments, 71, 72, 87, 88, 100, 101);
+
+    var node30 = this.nodes[30];
+    node30.hubType = 5;
+    node30.setNeighbors(this.nodes, 19, 20, 29, 31, 38);
+    node30.setSegments(this.segments, 73, 74, 88, 89, 102);
+
+    var node31 = this.nodes[31];
+    node31.hubType = 6;
+    node31.setNeighbors(this.nodes, 20, 21, 30, 32, 38, 39);
+    node31.setSegments(this.segments, 75, 76, 89, 90, 103, 104);
+
+    var node32 = this.nodes[32];
+    node32.hubType = 5;
+    node32.setNeighbors(this.nodes, 21, 22, 31, 33, 39);
+    node32.setSegments(this.segments, 77, 78, 90, 91, 105);
+
+    var node33 = this.nodes[33];
+    node33.hubType = 6;
+    node33.setNeighbors(this.nodes, 22, 23, 32, 34, 39, 40);
+    node33.setSegments(this.segments, 79, 80, 91, 92, 106, 107);
+
+    var node34 = this.nodes[34];
+    node34.hubType = 5;
+    node34.setNeighbors(this.nodes, 23, 24, 33, 35, 40);
+    node34.setSegments(this.segments, 81, 82, 92, 93, 108);
+
+    var node35 = this.nodes[35];
+    node35.hubType = 6;
+    node35.setNeighbors(this.nodes, 24, 25, 34, 26, 40, 36);
+    node35.setSegments(this.segments, 83, 84, 93, 94, 109, 95);
+
+    var node36 = this.nodes[36];
+    node36.hubType = 6;
+    node36.setNeighbors(this.nodes, 35, 26, 27, 40, 37, 41);
+    node36.setSegments(this.segments, 95, 96, 97, 114, 115);
+
+    var node37 = this.nodes[37];
+    node37.hubType = 6;
+    node37.setNeighbors(this.nodes, 27, 28, 29, 36, 38, 41);
+    node37.setSegments(this.segments, 98, 99, 100, 110, 111, 116);
+
+    var node38 = this.nodes[38];
+    node38.hubType = 6;
+    node38.setNeighbors(this.nodes, 29, 30, 31, 37, 39, 41);
+    node38.setSegments(this.segments, 101, 102, 103, 111, 112, 117);
+
+    var node39 = this.nodes[39];
+    node39.hubType = 6;
+    node39.setNeighbors(this.nodes, 31, 32, 33, 38, 40, 41);
+    node39.setSegments(this.segments, 104, 105, 106, 112, 113, 118);
+
+    var node40 = this.nodes[40];
+    node40.hubType = 6;
+    node40.setNeighbors(this.nodes, 33, 34, 35, 39, 36, 41);
+    node40.setSegments(this.segments, 107, 108, 109, 113, 114, 119);
+
+    var node41 = this.nodes[41];
+    node41.hubType = 5;
+    node41.setNeighbors(this.nodes, 36, 37, 38, 39, 40);
+    node41.setSegments(this.segments, 115, 116, 117, 118, 119);
   }
 
-  getBestPaths(startingNodeId: number = 0) {
+  getBestPaths(startingNodeIds: number[]) {
+    this.startingNodes = startingNodeIds;
     //init orb
     console.log('resetting orb..');
-    console.log('next attempt, starting at hub/node ', startingNodeId);
+    console.log('next attempt, starting at hubs/nodes ', startingNodeIds);
 
     this.initializeOrb();
 
     //init channels
-    var base = this.nodes[startingNodeId];
-    base.isBase = true;
-    var startSegments = _.sampleSize(base.segments, 4); //randomly select 4
 
-    startSegments.forEach((s) => {
-      s.lit = true;
-      s.pathPosition = 0;
-    });
-
-    console.log('startingSegments: ', startSegments);
-
+    startingNodeIds.forEach(nId => {
+      var base = this.nodes[nId];
+      base.isBase = true;
+      var startSegments = _.sampleSize(base.segments, 4); //randomly select 4
+      //might parameterize the number of channels in the future.
+  
+      startSegments.forEach((s) => {
+        s.lit = true;
+        s.pathPosition = 0;
+        s.baseNodeId = nId;
+      });
+    });    
+    
     //first extension
     var result = this.getNextSegmentId();
     var previousSegmentId = result[0];
@@ -192,8 +279,7 @@ export class Orb {
     }
 
     var total = this.totalLit();
-    console.log('total lit this attempt: ', this.totalLit());
-    console.log('most lit so far: ', this.mostLit);
+
     if (total >= this.mostLit) {
       //new best path
       var newContender = this.getPaths();
@@ -202,35 +288,30 @@ export class Orb {
       if (total == this.mostLit) {
         //they're equal
         //let's also score them based on their relative length similarity
-        var maxCurrentLength = Math.max(
-          this.bestPath[0].length,
-          this.bestPath[1].length,
-          this.bestPath[2].length,
-          this.bestPath[3].length
-        );
+        let maxCurrentLength = 0;
+        let minCurrentLength = 0;
 
-        var minCurrentLength = Math.min(
-          this.bestPath[0].length,
-          this.bestPath[1].length,
-          this.bestPath[2].length,
-          this.bestPath[3].length
-        );
+        maxCurrentLength = _.reduce(this.bestPath, function(max, n){
+          return Math.max(max, n.length);
+        }, maxCurrentLength);
+
+        maxCurrentLength = _.reduce(this.bestPath, function(min, n){
+          return Math.min(min, n.length);
+        }, minCurrentLength);
 
         var currentDisparity = maxCurrentLength - minCurrentLength;
 
-        var maxContenderLength = Math.max(
-          newContender[0].length,
-          newContender[1].length,
-          newContender[2].length,
-          newContender[3].length
-        );
+        //get latest metrics
+        let maxContenderLength = 0;
+        let minContenderLength = 0;
 
-        var minContenderLength = Math.min(
-          newContender[0].length,
-          newContender[1].length,
-          newContender[2].length,
-          newContender[3].length
-        );
+        maxContenderLength = _.reduce(newContender, function(max, n){
+          return Math.max(max, n.length);
+        }, maxContenderLength);
+
+        minContenderLength = _.reduce(newContender, function(min, n){
+          return Math.min(min, n.length);
+        }, minContenderLength);
 
         var latestDisparity = maxContenderLength - minContenderLength;
 
@@ -239,78 +320,78 @@ export class Orb {
 
       if (newerIsBetter) {
         this.mostLit = total;
+
+        startingNodeIds.forEach(nId => {
+          this.bestPaths.set(nId, this.getPaths(nId));
+        });
+
         this.fewestUnlit = this.unLit().map(u => u.id);
         this.bestPath = newContender;
+        
         console.log('set new best path: ', this.bestPath);
       }
     }
   }
 
-  getPaths(): number[][] {
-    var channel0path: number[] = [];
-    var channel1path: number[] = [];
-    var channel2path: number[] = [];
-    var channel3path: number[] = [];
+  getPaths(startingNodeIdx: number = -1): number[][] {
+    var fullPath: number[][] = [];
+    var startingSegments: OrbSegment[] = [];    
 
-    var startingSegments = this.segments.filter((s) => s.lit && !s.inSegment);
+    if (startingNodeIdx == -1) {      
+      startingSegments = this.segments.filter((s) => s.lit && !s.inSegment && s.pathPosition == 0);  
+    } else {
+      var startingNode = this.nodes[startingNodeIdx];
+      startingSegments = startingNode.segments.filter((s) => s.lit && !s.inSegment && s.pathPosition == 0 && s.baseNodeId == startingNodeIdx);
+    }
 
-    if (startingSegments.length > 4)
-      throw new Error('more than 4 starting segments');
+    var startingNodes = startingNodeIdx == -1 ? this.nodes.filter(n => n.isBase) : [this.nodes[startingNodeIdx]];
 
-    if (startingSegments[0])
-      channel0path = this.getPath(startingSegments[0], [
-        startingSegments[0].id,
-      ]);
-    if (startingSegments[1])
-      channel1path = this.getPath(startingSegments[1], [
-        startingSegments[1].id,
-      ]);
-    if (startingSegments[2])
-      channel2path = this.getPath(startingSegments[2], [
-        startingSegments[2].id,
-      ]);
-    if (startingSegments[3])
-      channel3path = this.getPath(startingSegments[3], [
-        startingSegments[3].id,
-      ]);
-    return [channel0path, channel1path, channel2path, channel3path];
+    if (startingSegments.length != startingNodes.length * 4)
+      throw new Error('uneven number of starting segments');
+    
+    startingSegments.forEach(s => {
+      fullPath.push(this.getPath(s, [s.id]));
+    });
+
+    return fullPath;
   }
 
-  getPath(s: Segment, path: number[]): number[] {
+  getPath(s: OrbSegment, path: number[]): number[] {
     if (!s.outSegment) return path;
     path.push(s.outSegment.id);
     return this.getPath(s.outSegment, path);
   }
 
   getNextSegmentId(): number[] {
-    let segToExtend!: Segment;
+    let segToExtend!: OrbSegment;
     var returnSegmentId = -1;
     // find shortest path
     // select a segment randomly from available options
 
     //first, get lit segments with no outsegment
     var pathEnds = this.segments.filter(
-      (s) => s.lit == true && s.outSegment == null
+      (s) => s.lit && s.outSegment == null
     );
     if (pathEnds.length == 0) return [-1, -1];
 
     //of those, select one with the shortest path to the base
     pathEnds = _.orderBy(pathEnds, 'pathPosition');
+    console.log("path ends: ", pathEnds);
 
     let attemptedIdx = -1;
 
     while (returnSegmentId == -1 && attemptedIdx < --pathEnds.length) {
       attemptedIdx++;
-      segToExtend = pathEnds[attemptedIdx] as Segment;
+      segToExtend = pathEnds[attemptedIdx] as OrbSegment;
       var nodeOptions = segToExtend.nodes.filter(
         (n) => !n.isBase && segToExtend.inSegment == null
       ); // for the first segment, we just need to select the node that isn't the base
-      var nextNode: Node;
+      var nextNode: OrbNode;
       if (nodeOptions.length == 1) nextNode = nodeOptions[0];
       else {
         var currentNodes = segToExtend?.nodes ?? [];
         var previousNodes = segToExtend?.inSegment?.nodes ?? [];
-        nextNode = _.difference(currentNodes, previousNodes)[0] as Node; //if not the first segment, select the node that wasn't already traversed.
+        nextNode = _.difference(currentNodes, previousNodes)[0] as OrbNode; //if not the first segment, select the node that wasn't already traversed.
       }
 
       if (nextNode != null) {
@@ -333,26 +414,26 @@ export class Orb {
     return this.segments.filter((s) => s.lit == true).length;
   }
 
-  unLit(){
+  unLit() {
     return this.segments.filter((s) => !s.lit)
   }
 }
 
-export class Node {
+export class OrbNode {
   isBase?: boolean; // where the controller connects and outputs it's channels
   id: number;
   hubType?: HubType;
-  segments: Segment[] = [];
-  neighbors: Node[] = [];
+  segments: OrbSegment[] = [];
+  neighbors: OrbNode[] = [];
 
-  setNeighbors(allNodes: Node[], ...nodeIndexes: number[]) {
+  setNeighbors(allNodes: OrbNode[], ...nodeIndexes: number[]) {
     this.neighbors = [];
     nodeIndexes.forEach((idx) => {
       this.neighbors.push(allNodes[idx]);
     });
   }
 
-  setSegments(allSegments: Segment[], ...segmentIndexes: number[]) {
+  setSegments(allSegments: OrbSegment[], ...segmentIndexes: number[]) {
     this.segments = [];
     segmentIndexes.forEach((idx) => {
       this.segments.push(allSegments[idx]);
@@ -364,13 +445,25 @@ export class Node {
   }
 }
 
-export class Segment {
+export class OrbSegment {
   id: number;
-  length: StripLength = 45; // not relevant for path calculations (yet) just modeling.
+  leds: number = 45; // not relevant for path calculations (yet) just modeling.
   thick: boolean = false;
-  nodes: Node[] = [];
-  inSegment?: Segment;
-  outSegment?: Segment;
+  nodes: OrbNode[] = [];
+  inSegment?: OrbSegment;
+  outSegment?: OrbSegment;
+
+  private _baseNodeId?: number;
+  public set baseNodeId(n: number){
+    this._baseNodeId = n;
+  }
+  public get baseNodeId():number{
+    return this._baseNodeId ?? this.inSegment.baseNodeId;
+  }
+
+  public get ledsInPath(){
+    return this.leds + (this.inSegment ? this.inSegment.ledsInPath : 0)
+  }
 
   private _lit = false;
   public set lit(isLit: boolean) {
@@ -399,7 +492,6 @@ export class OrbPathConfiguration {
   public channel1Path: number[] = [];
   public channel2Path: number[] = [];
   public channel3Path: number[] = [];
-
   public litSegmentIds: number[] = [];
   public startingNode: number = -1;
 }

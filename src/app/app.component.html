@@ -32,8 +32,24 @@
     position: relative;
   }
 
-  .segId {
-    margin-left: 1em;
+  .unlit-segment-container {
+    position: relative;
+    margin-top: 3em;
+  }
+
+  .segments {
+    display: flex;
+    position: relative;
+    left: 100px;
+    top: -2.5em;
+  }
+
+  .channel-subheader {
+    position: absolute;
+    font-size: x-small;
+    left: 0;
+    top: 2.3em;
+    font-weight: lighter;
   }
 </style>
 
@@ -51,8 +67,12 @@
       <mat-card-content>
         <form>
           <mat-form-field appearance="fill">
-            <mat-label>Starting node</mat-label>
-            <input matInput type="number" [(ngModel)]="startingNode" name="startingNode">
+            <mat-label>Starting node 1</mat-label>
+            <input matInput type="number" [(ngModel)]="startingNode1" name="startingNode1">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Starting node 2</mat-label>
+            <input matInput type="number" [(ngModel)]="startingNode2" name="startingNode2">
           </mat-form-field>
           <mat-form-field appearance="fill">
             <mat-label>Maximum attempts</mat-label>
@@ -63,6 +83,7 @@
       <mat-divider inset></mat-divider>
       <mat-card-actions *ngIf="!generating" color="accent">
         <button mat-button (click)="findSolution()">GENERATE AND EVALUATE</button>
+        <button mat-button (click)="resetOrb()">RESET</button>
       </mat-card-actions>
       <mat-card-footer>
         <h4>{{attempts}} patterns evaluated.</h4>
@@ -73,28 +94,40 @@
     <mat-card>
       <mat-card-title>Best effort</mat-card-title>
       <mat-card-subtitle>{{maxLit}}/{{orb.segments.length}} powered segments.</mat-card-subtitle>
+      <mat-card-content>
+        <div *ngFor="let startNode of bestPaths | keyvalue">
+          <mat-list role="list">
+            <h3>Controller at node {{startNode.key}}</h3>
 
-      <mat-list role="list">
-        <mat-list-item role="listitem" *ngFor="let channelNumber of [0,1,2,3]">
-          <mat-label color="accent" style="font-weight:bold;height: 2.5em;">Channel {{ channelNumber }}</mat-label>
-          <div class="pathGroup">
-            <div class="segId" *ngFor="let segmentIndex of orb.bestPath[channelNumber]">
-              <mat-icon [matBadge]="segmentIndex"></mat-icon>
+            <mat-list-item role="listitem" *ngFor="let channelNumber of [0,1,2,3]">
+              <div class="mat-title" color="accent">Channel {{ channelNumber }} </div>
+              <span class="channel-subheader">({{startNode.value[channelNumber].length}} segments,
+                {{totalLedsInChannelPath(startNode.key, channelNumber)}} leds)</span>
+              <div class="pathGroup">
+                <div class="segId" *ngFor="let segmentIndex of startNode.value[channelNumber]">
+                  <mat-icon [matBadge]="segmentIndex"></mat-icon>
+                </div>
+              </div>
+            </mat-list-item>
+
+          </mat-list>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="unlit-segment-container" *ngIf="unlitSegments.length > 0">
+          <div class="mat-title" style="width: 100px;text-align: right;" color="accent">Un-Lit</div>
+          <span class="channel-subheader">({{unlitSegments.length}} un-lit segments, {{totalUnlitLeds}} leds)</span>
+          <div class="segments">
+            <div class="segId" *ngFor="let segmentId of unlitSegments">
+              <mat-icon [matBadge]="segmentId" color="accent"></mat-icon>
             </div>
           </div>
-        </mat-list-item>
-        <mat-list-item>
-          <mat-label color="accent" style="font-weight:bold;height: 2.5em;">Un-Lit</mat-label>
-          <div class="segId" *ngFor="let segmentId of unlitSegments">
-            <mat-icon [matBadge]="segmentId" color="accent"></mat-icon>
-          </div>
-        </mat-list-item>
-      </mat-list>
+        </div>
+      </mat-card-content>
       <mat-card-footer>
-        <mat-progress-bar *ngIf="generating == true" mode="determinate" [value]="(maxLit / orb.segments.length * 100)">
+        <mat-progress-bar *ngIf="generating" mode="determinate" [value]="(maxLit / orb.segments.length * 100)">
         </mat-progress-bar>
         <br />
-        <h6>{{allLit ? "Huzzah!" : "Not there yet."}}</h6>
+        <div *ngIf="allLit">Huzzah!</div>
       </mat-card-footer>
     </mat-card>
   </div>
