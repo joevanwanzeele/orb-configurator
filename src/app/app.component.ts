@@ -31,26 +31,29 @@ export class AppComponent implements OnInit {
   }
 
   constructor(private cdr: ChangeDetectorRef){
-    this.orb.$running.subscribe(running => {
-      console.log("running event fired!", running)
-      this.generating = running;
-      cdr.detectChanges();
-    });
 
-    this.orb.$newBestEvent.subscribe(newBestPath => {
-      this.bestPaths = newBestPath;  
-      this.allLit = this.orb.allLit();
-      this.unlitSegments = this.orb.fewestUnlit;
-      var unlitOrbSegments = this.unlitSegments.map(sId => this.orb.segments[sId]);
-      this.totalUnlitLeds = _.sumBy(unlitOrbSegments, "leds");
-      this.attempts = this.maxAttempts;   
-      this.totalUntilBest = this.orb.attemptTally;
-      console.log("new best path event!");
-    });
   }
 
+  setNewBest(newBestPath){
+    console.log("setting new best ", newBestPath);
+    this.bestPaths = newBestPath;  
+    this.allLit = this.orb.allLit();
+    this.unlitSegments = this.orb.fewestUnlit;
+    var unlitOrbSegments = this.unlitSegments.map(sId => this.orb.segments[sId]);
+    this.totalUnlitLeds = _.sumBy(unlitOrbSegments, "leds");
+    this.attempts += this.maxAttempts;   
+    //console.log("so... attempts should equal maxattempts now, which equals ", this.maxAttempts)
+    this.totalUntilBest = this.orb.attemptTally;
+  }
   ngOnInit(): void {
+    this.orb.$running.subscribe(running => {
+      this.generating = running;
+      if (!running){
+        this.attempts = this.maxAttempts;
+      }
+    });
 
+    this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
   }
 
   resetOrb() {
@@ -78,6 +81,6 @@ export class AppComponent implements OnInit {
     this.generating = true;
 
     setTimeout(() =>
-      this.orb.findSolution([this.startingNode1, this.startingNode2], this.maxAttempts), 2);
+      this.orb.findSolution([this.startingNode1, this.startingNode2], this.maxAttempts), 100);
   }
 }

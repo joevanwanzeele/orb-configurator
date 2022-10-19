@@ -271,11 +271,11 @@ export class Orb {
 
   async runit(maxAttempts:number, startingNodeIds: number[] ){
     this.initializeOrb();
-    console.log('running it.. maxAttempts = ', maxAttempts);
-    console.log('are they all lit??  ', this.allLit())
+    //console.log('running it.. maxAttempts = ', maxAttempts);
+    //console.log('are they all lit??  ', this.allLit())
     var attempts = 0;
     while (!this.allLit() && attempts < maxAttempts) {
-      console.log('in the loop..');
+      //console.log('in the loop..');
       await this.getBestPaths(startingNodeIds);
       attempts++;
       this.attemptTally++;
@@ -286,9 +286,9 @@ export class Orb {
   async findSolution(startingNodeIds: number[], maxAttempts: number){
     this.$running.next(true);
 
-    console.log('getting ready to wait.. ');
+    //console.log('getting ready to wait.. ');
     await this.runit(maxAttempts, startingNodeIds);
-    console.log('done waiting')
+    //console.log('done waiting')
 
     this.$running.next(false);
   }
@@ -333,9 +333,9 @@ export class Orb {
     }
 
     var total = this.totalLit();
-    console.log("comparing solutions.. ");
-    console.log("previous best: ", this.mostLit);
-    console.log("current result: ", total);
+    //console.log("comparing solutions.. ");
+    //console.log("previous best: ", this.mostLit);
+    //console.log("current result: ", total);
     if (total >= this.mostLit) {
       //new best path
       var newContender = this.getPaths();

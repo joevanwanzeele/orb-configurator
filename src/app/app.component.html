@@ -92,8 +92,8 @@
         <button mat-button (click)="resetOrb()" [disabled]="generating">RESET</button>
       </mat-card-actions>
       <mat-card-footer>
-        <h4 *ngIf="attempts>0">{{attempts}} patterns evaluated this run.</h4>
-        <h4 *ngIf="orb.attemptTally > 0">{{orb.attemptTally}} total patterns evaluated.</h4>
+        <h4 *ngIf="attempts > 0 && !generating">{{attempts}} patterns evaluated this run.</h4>
+        <h4 *ngIf="orb.attemptTally > 0 && !generating">{{orb.attemptTally}} total patterns evaluated.</h4>
         <mat-progress-bar *ngIf="generating" mode="indeterminate"></mat-progress-bar>
       </mat-card-footer>
     </mat-card>
