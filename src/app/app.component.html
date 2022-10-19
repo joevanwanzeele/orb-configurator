@@ -51,6 +51,12 @@
     top: 2.3em;
     font-weight: lighter;
   }
+
+  .result-label{
+    margin-top: 1em !important;
+    position: relative;
+    left: 45%;
+  }
 </style>
 
 <!-- Toolbar -->
@@ -82,18 +88,22 @@
       </mat-card-content>
       <mat-divider inset></mat-divider>
       <mat-card-actions *ngIf="!generating" color="accent">
-        <button mat-button (click)="findSolution()">GENERATE AND EVALUATE</button>
-        <button mat-button (click)="resetOrb()">RESET</button>
+        <button mat-button (click)="findSolution()" [disabled]="generating">GENERATE AND EVALUATE</button>
+        <button mat-button (click)="resetOrb()" [disabled]="generating">RESET</button>
       </mat-card-actions>
       <mat-card-footer>
-        <h4>{{attempts}} patterns evaluated.</h4>
-        <mat-progress-bar *ngIf="generating == true" mode="indeterminate"></mat-progress-bar>
+        <h4 *ngIf="attempts>0">{{attempts}} patterns evaluated this run.</h4>
+        <h4 *ngIf="orb.attemptTally > 0">{{orb.attemptTally}} total patterns evaluated.</h4>
+        <mat-progress-bar *ngIf="generating" mode="indeterminate"></mat-progress-bar>
       </mat-card-footer>
     </mat-card>
 
-    <mat-card>
+    <mat-card *ngIf="orb.attemptTally > 0">
       <mat-card-title>Best effort</mat-card-title>
-      <mat-card-subtitle>{{maxLit}}/{{orb.segments.length}} powered segments.</mat-card-subtitle>
+      <mat-card-subtitle class="result-label">{{maxLit}}/{{orb.segments.length}} powered segments.</mat-card-subtitle>
+      <mat-progress-bar mode="determinate" color="warn" [value]="(maxLit / orb.segments.length * 100)"></mat-progress-bar>
+      <mat-card-subtitle class="result-label">Found after {{orb.attemptsUntilBest}} attempts.</mat-card-subtitle>
+
       <mat-card-content>
         <div *ngFor="let startNode of bestPaths | keyvalue">
           <mat-list role="list">
@@ -124,8 +134,7 @@
         </div>
       </mat-card-content>
       <mat-card-footer>
-        <mat-progress-bar *ngIf="generating" mode="determinate" [value]="(maxLit / orb.segments.length * 100)">
-        </mat-progress-bar>
+
         <br />
         <div *ngIf="allLit">Huzzah!</div>
       </mat-card-footer>

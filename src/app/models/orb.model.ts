@@ -1,4 +1,6 @@
+import { resolveForwardRef } from '@angular/core';
 import * as _ from 'lodash';
+import { Subject } from 'rxjs';
 
 export type HubType = 5 | 6;
 export const TOTAL_NODES = 42;
@@ -12,12 +14,24 @@ export class Orb {
   bestPaths = new Map<number, number[][]>();
   fewestUnlit: number[] = [];
   startingNodes: number[] = [];
+  attemptsUntilBest = 0;
+  attemptTally = 0;
+  $newBestEvent = new Subject<any>();
+  $running = new Subject<boolean>();
+
+  constructor(){
+    this.findSolution.bind(this);
+    this.runit.bind(this);
+  }
 
   resetOrb(){
     this.bestPath = [];
     this.bestPaths = new Map<number, number[][]>();
     this.fewestUnlit = [];
     this.startingNodes = [];
+    this.attemptTally = 0;
+    this.mostLit = 0;
+    this.attemptsUntilBest = 0;
     this.initializeOrb();
   }
 
@@ -221,7 +235,7 @@ export class Orb {
     var node36 = this.nodes[36];
     node36.hubType = 6;
     node36.setNeighbors(this.nodes, 35, 26, 27, 40, 37, 41);
-    node36.setSegments(this.segments, 95, 96, 97, 114, 115);
+    node36.setSegments(this.segments, 95, 96, 97, 110, 114, 115);
 
     var node37 = this.nodes[37];
     node37.hubType = 6;
@@ -247,15 +261,43 @@ export class Orb {
     node41.hubType = 5;
     node41.setNeighbors(this.nodes, 36, 37, 38, 39, 40);
     node41.setSegments(this.segments, 115, 116, 117, 118, 119);
+
+    this.nodes.forEach(node => {
+      var n = Number.parseInt(node.hubType.toString());
+      var ok = node.segments.length == node.neighbors.length && node.neighbors.length == n
+      if (!ok) throw `Setup Error!  check values for node ${node.id}`;
+    })
   }
 
-  getBestPaths(startingNodeIds: number[]) {
+  async runit(maxAttempts:number, startingNodeIds: number[] ){
+    this.initializeOrb();
+    console.log('running it.. maxAttempts = ', maxAttempts);
+    console.log('are they all lit??  ', this.allLit())
+    var attempts = 0;
+    while (!this.allLit() && attempts < maxAttempts) {
+      console.log('in the loop..');
+      await this.getBestPaths(startingNodeIds);
+      attempts++;
+      this.attemptTally++;
+      this.initializeOrb();
+    }
+  }
+
+  async findSolution(startingNodeIds: number[], maxAttempts: number){
+    this.$running.next(true);
+
+    console.log('getting ready to wait.. ');
+    await this.runit(maxAttempts, startingNodeIds);
+    console.log('done waiting')
+
+    this.$running.next(false);
+  }
+
+  async getBestPaths(startingNodeIds: number[]) {
     this.startingNodes = startingNodeIds;
     //init orb
-    console.log('resetting orb..');
-    console.log('next attempt, starting at hubs/nodes ', startingNodeIds);
-
-    this.initializeOrb();
+    //console.log('clearing previous paths...');
+    //console.log('next attempt, starting at hubs/nodes ', startingNodeIds);
 
     //init channels
 
@@ -279,6 +321,7 @@ export class Orb {
 
     // console.log('starting segment: ', previousSegmentId);
     // console.log('next segment: ', nextSegmentId);
+
 
     while (!this.allLit() && nextSegmentId != -1) {
       this.segments[nextSegmentId].inSegment = this.segments[previousSegmentId];
@@ -332,15 +375,18 @@ export class Orb {
       }
 
       if (newerIsBetter) {
+
         this.mostLit = total;
+        this.bestPath = newContender;
 
         startingNodeIds.forEach(nId => {
           this.bestPaths.set(nId, this.getPaths(nId));
         });
 
         this.fewestUnlit = this.unLit().map(u => u.id);
-        this.bestPath = newContender;
 
+        this.$newBestEvent.next(this.bestPaths)
+        this.attemptsUntilBest = this.attemptTally;
         console.log('set new best path: ', this.bestPath);
       }
     }

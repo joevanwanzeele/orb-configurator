@@ -1,22 +1,23 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import * as _ from 'lodash';
-import { Orb, OrbSegment } from '../app/models/orb.model';
+import { Orb } from '../app/models/orb.model';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   orb = new Orb();
-  startingNode1 = 0;
-  startingNode2 = 41;
+  startingNode1 = 2;
+  startingNode2 = 24;
   randomStartNode = false;
-  maxAttempts = 1000;
+  maxAttempts = 5000;
   attempts = 0;
+  totalUntilBest = 0;
   score = 0;
   title = 'brute force orb path finder.';
-  generating = false;
+  generating: boolean;
   allLit = false;
   totalUnlitLeds = -1;
 
@@ -29,11 +30,35 @@ export class AppComponent {
     return this.orb.mostLit;
   }
 
+  constructor(private cdr: ChangeDetectorRef){
+    this.orb.$running.subscribe(running => {
+      console.log("running event fired!", running)
+      this.generating = running;
+      cdr.detectChanges();
+    });
+
+    this.orb.$newBestEvent.subscribe(newBestPath => {
+      this.bestPaths = newBestPath;  
+      this.allLit = this.orb.allLit();
+      this.unlitSegments = this.orb.fewestUnlit;
+      var unlitOrbSegments = this.unlitSegments.map(sId => this.orb.segments[sId]);
+      this.totalUnlitLeds = _.sumBy(unlitOrbSegments, "leds");
+      this.attempts = this.maxAttempts;   
+      this.totalUntilBest = this.orb.attemptTally;
+      console.log("new best path event!");
+    });
+  }
+
+  ngOnInit(): void {
+
+  }
+
   resetOrb() {
     console.log('resetting orb data');
     this.allLit = false;
     this.score = 0;
-    this.totalUnlitLeds = -1;    
+    this.totalUnlitLeds = -1;
+    this.totalUntilBest = 0;
     this.unlitSegments = [];
     this.bestPaths = new Map<number, number[][]>();
 
@@ -47,32 +72,12 @@ export class AppComponent {
     var segmentIds = this.bestPaths.get(startNodeId)[channelId];
     var segments = segmentIds.map(sId => this.orb.segments[sId]);
     return _.sumBy(segments, "leds");
-    //var total = this.orb.segments[segIdx].ledsInPath;
-    //return total;
   }
 
   findSolution() {
     this.generating = true;
 
-    this.orb.initializeOrb();
-    this.attempts = 0;
-
-    var runit = new Promise((done) => {
-      while (!this.allLit && this.attempts < this.maxAttempts) {
-        this.orb.getBestPaths([this.startingNode1, this.startingNode2]);
-        this.attempts++;
-      }
-      done(this.orb.bestPaths);
-    });
-
-    runit.then((bestPaths: Map<number, number[][]>) => {
-      this.allLit = this.orb.allLit();
-      this.unlitSegments = this.orb.fewestUnlit;
-      var unlitOrbSegments = this.unlitSegments.map(sId => this.orb.segments[sId]);
-      this.totalUnlitLeds = _.sumBy(unlitOrbSegments, "leds");
-      this.generating = false;
-      this.bestPaths = bestPaths;      
-      console.log(this.bestPaths);
-    });
+    setTimeout(() =>
+      this.orb.findSolution([this.startingNode1, this.startingNode2], this.maxAttempts), 2);
   }
 }
