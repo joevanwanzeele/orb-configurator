@@ -10,7 +10,8 @@ import { Orb } from '../app/models/orb.model';
 export class AppComponent implements OnInit {
   orb = new Orb();
   startingNode1 = 2;
-  startingNode2 = 24;
+  startingNode2 = 18;
+  startingNode3 = 24;
   randomStartNode = false;
   maxAttempts = 5000;
   attempts = 0;
@@ -81,6 +82,6 @@ export class AppComponent implements OnInit {
     this.generating = true;
 
     setTimeout(() =>
-      this.orb.findSolution([this.startingNode1, this.startingNode2], this.maxAttempts), 100);
+      this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3], this.maxAttempts), 100);
   }
 }
