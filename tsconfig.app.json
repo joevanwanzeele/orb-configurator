@@ -12,5 +12,5 @@
   "include": [
     "src/**/*.d.ts"
   ],
-  //"exclude": ["**/*.worker.ts"]
+  "exclude": ["**/*.worker.ts"]
 }

@@ -58,8 +58,8 @@ export class AppComponent implements OnInit {
     // this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
 
     if (typeof Worker !== 'undefined') {
-      this.webWorker = await spawn(new Worker("./orb.worker"));
-      //this.webWorker = new Worker(new URL('./orb.worker', import.meta.url));
+      //this.webWorker = await spawn(new Worker("./orb.worker"));
+      this.webWorker = new Worker('./orb.worker', { type: 'module' });
       this.webWorker.onmessage = function (data) {
         if (data.done) {
           this.generating = false;
@@ -96,18 +96,8 @@ export class AppComponent implements OnInit {
   async findSolution() {
     if (this.generating) { alert("please wait until current attempts are complete."); return }
     this.generating = true;
-    this.webWorker = await spawn(new Worker("./orb.worker"));
-    this.webWorker.onmessage = function (data) {
-      if (data.done) {
-        this.generating = false;
-      }
-      else this.setNewBest.bind(this)(data);
-    }
-    await this.webWorker.runCheckPaths(this.orb, this.maxAttempts, [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4]);
+    postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] });
 
-    await Thread.terminate(this.webWorker);
-
-    this.generating = false;
     // setTimeout(() =>
     //   this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts), 100);
   }
