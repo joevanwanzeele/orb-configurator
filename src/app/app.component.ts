@@ -10,8 +10,9 @@ import { Orb } from '../app/models/orb.model';
 export class AppComponent implements OnInit {
   orb = new Orb();
   startingNode1 = 2;
-  startingNode2 = 18;
-  startingNode3 = 24;
+  startingNode2 = 4;
+  startingNode3 = 10;
+  startingNode4 = 14;
   randomStartNode = false;
   maxAttempts = 5000;
   attempts = 0;
@@ -21,6 +22,7 @@ export class AppComponent implements OnInit {
   generating: boolean;
   allLit = false;
   totalUnlitLeds = -1;
+  webWorker;
 
   unlitSegments: number[] = [];
   bestPaths = new Map<number, number[][]>();
@@ -31,30 +33,44 @@ export class AppComponent implements OnInit {
     return this.orb.mostLit;
   }
 
-  constructor(private cdr: ChangeDetectorRef){
+  constructor(private cdr: ChangeDetectorRef) {
 
   }
 
-  setNewBest(newBestPath){
+  setNewBest(newBestPath) {
     console.log("setting new best ", newBestPath);
-    this.bestPaths = newBestPath;  
+    this.bestPaths = newBestPath;
     this.allLit = this.orb.allLit();
     this.unlitSegments = this.orb.fewestUnlit;
     var unlitOrbSegments = this.unlitSegments.map(sId => this.orb.segments[sId]);
     this.totalUnlitLeds = _.sumBy(unlitOrbSegments, "leds");
-    this.attempts += this.maxAttempts;   
+    this.attempts += this.maxAttempts;
     //console.log("so... attempts should equal maxattempts now, which equals ", this.maxAttempts)
     this.totalUntilBest = this.orb.attemptTally;
   }
-  ngOnInit(): void {
-    this.orb.$running.subscribe(running => {
-      this.generating = running;
-      if (!running){
-        this.attempts = this.maxAttempts;
-      }
-    });
 
-    this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
+  ngOnInit(): void {
+    // this.orb.$running.subscribe(running => {
+    //   this.generating = running;
+    //   if (!running){
+    //     this.attempts = this.maxAttempts;
+    //   }
+    // });
+
+    // this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
+
+    if (typeof Worker !== 'undefined') {
+      this.webWorker = new Worker(new URL('./orb.worker', import.meta.url));
+      this.webWorker.onmessage = function (data) {
+        if (data.done) {
+          this.generating = false;
+        }
+        else this.setNewBest.bind(this)(data);
+      }
+    }
+    else {
+      console.warn("Web workers are not supported.");
+    }
   }
 
   resetOrb() {
@@ -72,16 +88,17 @@ export class AppComponent implements OnInit {
     console.log('segments: ', this.orb.segments);
   }
 
-  totalLedsInChannelPath(startNodeId: number, channelId: number):number{
+  totalLedsInChannelPath(startNodeId: number, channelId: number): number {
     var segmentIds = this.bestPaths.get(startNodeId)[channelId];
     var segments = segmentIds.map(sId => this.orb.segments[sId]);
     return _.sumBy(segments, "leds");
   }
 
   findSolution() {
+    if (this.generating) { alert("please wait until current attempts are complete."); return }
     this.generating = true;
-
-    setTimeout(() =>
-      this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3], this.maxAttempts), 100);
+    this.webWorker.postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] })
+    // setTimeout(() =>
+    //   this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts), 100);
   }
 }

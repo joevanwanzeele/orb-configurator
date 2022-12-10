@@ -1,4 +1,3 @@
-import { resolveForwardRef } from '@angular/core';
 import * as _ from 'lodash';
 import { Subject } from 'rxjs';
 
@@ -19,12 +18,12 @@ export class Orb {
   $newBestEvent = new Subject<any>();
   $running = new Subject<boolean>();
 
-  constructor(){
+  constructor() {
     this.findSolution.bind(this);
     this.runit.bind(this);
   }
 
-  resetOrb(){
+  resetOrb() {
     this.bestPath = [];
     this.bestPaths = new Map<number, number[][]>();
     this.fewestUnlit = [];
@@ -47,7 +46,7 @@ export class Orb {
       this.nodes.push(new OrbNode(i));
     }
 
-    var longSegs = [5,6,7,8,9,10,12,13,15,16,18,19,21,22,24,37,38,41,42,45,46,49,50,53,54,55,56,57,58,59,60,61,62,63,64,65,66,69,70,73,74,77,78,81,82,95,96,98,99,101,102,104,105,107,108,110,111,112,113,115]
+    var longSegs = [5, 6, 7, 8, 9, 10, 12, 13, 15, 16, 18, 19, 21, 22, 24, 37, 38, 41, 42, 45, 46, 49, 50, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 69, 70, 73, 74, 77, 78, 81, 82, 95, 96, 98, 99, 101, 102, 104, 105, 107, 108, 110, 111, 112, 113, 115]
     longSegs.forEach(sId => this.segments[sId].leds = 51);
 
     var node0 = this.nodes[0];
@@ -269,7 +268,7 @@ export class Orb {
     })
   }
 
-  async runit(maxAttempts:number, startingNodeIds: number[] ){
+  async runit(maxAttempts: number, startingNodeIds: number[]) {
     this.initializeOrb();
     //console.log('running it.. maxAttempts = ', maxAttempts);
     //console.log('are they all lit??  ', this.allLit())
@@ -283,7 +282,7 @@ export class Orb {
     }
   }
 
-  async findSolution(startingNodeIds: number[], maxAttempts: number){
+  async findSolution(startingNodeIds: number[], maxAttempts: number) {
     this.$running.next(true);
 
     //console.log('getting ready to wait.. ');
@@ -304,9 +303,11 @@ export class Orb {
     startingNodeIds.forEach(nId => {
       var base = this.nodes[nId];
       base.isBase = true;
-      var startSegments = _.sampleSize(base.segments, 4); //randomly select 4
-      //might parameterize the number of channels in the future.
-
+      if (base.segments.filter(s => !s.lit).length < 4){
+        console.warn("unable to utilize all of the channels for conroller "+ nId);        
+      }
+      var startSegments = _.sampleSize(base.segments.filter(s => !s.lit), 4); //randomly select 4 unlit segments
+      
       startSegments.forEach((s) => {
         s.lit = true;
         s.pathPosition = 0;
