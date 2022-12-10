@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import * as _ from 'lodash';
 import { Orb } from '../app/models/orb.model';
 
@@ -33,9 +33,6 @@ export class AppComponent implements OnInit {
     return this.orb.mostLit;
   }
 
-  constructor(private cdr: ChangeDetectorRef) {
-
-  }
 
   setNewBest(newBestPath) {
     console.log("setting new best ", newBestPath);
