@@ -3,13 +3,16 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/worker",
-    "lib": [
-      "es2018",
+    "lib": [   
       "webworker"
     ],
-    "types": []
+    "types": ["node"]
   },
+  "files": [
+    "src/app/bruteforce.worker.ts",
+
+  ],
   "include": [
-    "src/**/*.worker.ts"
-  ]
+    "src/**/bruteforce.worker.ts",
+  ],  
 }

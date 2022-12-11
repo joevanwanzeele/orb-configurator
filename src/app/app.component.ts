@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+//import { WorkerClient, WorkerManager } from 'angular-web-worker/angular';
 import * as _ from 'lodash';
 import { Orb } from '../app/models/orb.model';
-import { spawn, Thread, Worker } from "threads"
+//import { OrbWorker } from './orb.worker';
 
 @Component({
   selector: 'app-root',
@@ -10,9 +11,9 @@ import { spawn, Thread, Worker } from "threads"
 })
 export class AppComponent implements OnInit {
   orb = new Orb();
-  startingNode1 = 2;
-  startingNode2 = 4;
-  startingNode3 = 10;
+  startingNode1 = 1;
+  startingNode2 = 9;
+  startingNode3 = 4;
   startingNode4 = 14;
   randomStartNode = false;
   maxAttempts = 5000;
@@ -23,8 +24,6 @@ export class AppComponent implements OnInit {
   generating: boolean;
   allLit = false;
   totalUnlitLeds = -1;
-  webWorker;
-
   unlitSegments: number[] = [];
   bestPaths = new Map<number, number[][]>();
   get totalLit(): number {
@@ -33,7 +32,6 @@ export class AppComponent implements OnInit {
   get maxLit(): number {
     return this.orb.mostLit;
   }
-
 
   setNewBest(newBestPath) {
     console.log("setting new best ", newBestPath);
@@ -47,29 +45,16 @@ export class AppComponent implements OnInit {
     this.totalUntilBest = this.orb.attemptTally;
   }
 
-  async ngOnInit(): Promise<void> {
-    // this.orb.$running.subscribe(running => {
-    //   this.generating = running;
-    //   if (!running){
-    //     this.attempts = this.maxAttempts;
-    //   }
-    // });
-
-    // this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
-
-    if (typeof Worker !== 'undefined') {
-      //this.webWorker = await spawn(new Worker("./orb.worker"));
-      this.webWorker = new Worker('./orb.worker', { type: 'module' });
-      this.webWorker.onmessage = function (data) {
-        if (data.done) {
-          this.generating = false;
-        }
-        else this.setNewBest.bind(this)(data);
+  ngOnInit(): void {
+    this.orb.$running.subscribe(running => {
+      this.generating = running;
+      if (!running) {
+        this.attempts = this.maxAttempts;
       }
-    }
-    else {
-      console.warn("Web workers are not supported.");
-    }
+    });
+
+    this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
+
   }
 
   resetOrb() {
@@ -87,6 +72,14 @@ export class AppComponent implements OnInit {
     console.log('segments: ', this.orb.segments);
   }
 
+  totalLedsInChannel(startNodeId: number){
+    var total = 0;
+    this.bestPaths.get(startNodeId).forEach((channel, idx) => {      
+      total += this.totalLedsInChannelPath(startNodeId, idx);
+    })
+    return total;
+  }
+
   totalLedsInChannelPath(startNodeId: number, channelId: number): number {
     var segmentIds = this.bestPaths.get(startNodeId)[channelId];
     var segments = segmentIds.map(sId => this.orb.segments[sId]);
@@ -94,12 +87,24 @@ export class AppComponent implements OnInit {
   }
 
   async findSolution() {
-    if (this.generating) { alert("please wait until current attempts are complete."); return }
+    if (this.generating) { console.warn("please wait until current attempts are complete."); return }
     this.generating = true;
-    postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] });
+    //console.log("about to call web worker");
+    // const _worker = new Worker(new URL('./bruteforce.worker', import.meta.url));
+    // _worker.onmessage = ({ data }) => { console.log(data); this.generating = false; };
+    //_worker.addListener("message", ({data}) => console.log(data));
+    //console.log(_worker);
+    //_worker.postMessage({ maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4]});    
+    //console.log("called webworker");
+    //_worker.postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] });
+   
 
-    // setTimeout(() =>
-    //   this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts), 100);
+    //await this.client.call(w => w.runCheckPaths(this.orb, this.maxAttempts, [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4]));
+
+    //postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] });
+
+    setTimeout(() =>
+      this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts), 100);
   }
 }
 

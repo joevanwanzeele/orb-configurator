@@ -19,10 +19,8 @@
     "target": "es2022",
     "module": "es2020",
     "types":[],
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -30,4 +28,5 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
+  "exclude": ["node_modules"]
 }

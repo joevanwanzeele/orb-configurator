@@ -1,64 +1,3 @@
-<style>
-  body {
-    padding: 5em;
-    background: #eee !important;
-  }
-
-  .mat-card-container,
-  .mat-content-container {
-    background: #eee !important;
-  }
-
-  .mat-content-container {
-    height: 100%;
-  }
-
-  input {
-    margin-right: 3em;
-  }
-
-  mat-card {
-    margin: 3em;
-    padding: 2em;
-    width: 80%;
-  }
-
-  .mat-form-field {
-    margin-right: 1em;
-  }
-
-  .pathGroup {
-    display: flex;
-    position: relative;
-  }
-
-  .unlit-segment-container {
-    position: relative;
-    margin-top: 3em;
-  }
-
-  .segments {
-    display: flex;
-    position: relative;
-    left: 100px;
-    top: -2.5em;
-  }
-
-  .channel-subheader {
-    position: absolute;
-    font-size: x-small;
-    left: 0;
-    top: 2.3em;
-    font-weight: lighter;
-  }
-
-  .result-label{
-    margin-top: 1em !important;
-    position: relative;
-    left: 45%;
-  }
-</style>
-
 <!-- Toolbar -->
 <div class="mat-content-container" role="main">
   <mat-toolbar color="primary">
@@ -116,6 +55,7 @@
         <div *ngFor="let startNode of bestPaths | keyvalue">
           <mat-list role="list">
             <h3>Controller at node {{startNode.key}}</h3>
+            <h5>Total LEDs: {{totalLedsInChannel(startNode.key)}}</h5>
 
             <mat-list-item role="listitem" *ngFor="let channelNumber of [0,1,2,3]">
               <div class="mat-title" color="accent">Channel {{ channelNumber }} </div>

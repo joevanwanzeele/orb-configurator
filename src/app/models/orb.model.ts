@@ -303,11 +303,11 @@ export class Orb {
     startingNodeIds.forEach(nId => {
       var base = this.nodes[nId];
       base.isBase = true;
-      if (base.segments.filter(s => !s.lit).length < 4){
-        console.warn("unable to utilize all of the channels for conroller "+ nId);        
+      if (base.segments.filter(s => !s.lit).length < 4) {
+        console.warn("unable to utilize all of the channels for conroller " + nId);
       }
       var startSegments = _.sampleSize(base.segments.filter(s => !s.lit), 4); //randomly select 4 unlit segments
-      
+
       startSegments.forEach((s) => {
         s.lit = true;
         s.pathPosition = 0;
@@ -345,34 +345,15 @@ export class Orb {
       if (total == this.mostLit) {
         //they're equal
         //let's also score them based on their relative length similarity
-        let maxCurrentLength = 0;
-        let minCurrentLength = 0;
+        var currentDisparity = this.pathLengthDisparity(this.bestPath);
+        var latestDisparity = this.pathLengthDisparity(newContender);
 
-        maxCurrentLength = _.reduce(this.bestPath, function (max, n) {
-          return Math.max(max, n.length);
-        }, maxCurrentLength);
+        newerIsBetter = currentDisparity >= latestDisparity; //the latest has more length disparity (and is less desirable).
 
-        maxCurrentLength = _.reduce(this.bestPath, function (min, n) {
-          return Math.min(min, n.length);
-        }, minCurrentLength);
+        var currentLedsDisparity = this.numberOfLedsDisparity(this.bestPath);
+        var latestLedsDisparity = this.numberOfLedsDisparity(newContender);
 
-        var currentDisparity = maxCurrentLength - minCurrentLength;
-
-        //get latest metrics
-        let maxContenderLength = 0;
-        let minContenderLength = 0;
-
-        maxContenderLength = _.reduce(newContender, function (max, n) {
-          return Math.max(max, n.length);
-        }, maxContenderLength);
-
-        minContenderLength = _.reduce(newContender, function (min, n) {
-          return Math.min(min, n.length);
-        }, minContenderLength);
-
-        var latestDisparity = maxContenderLength - minContenderLength;
-
-        if (currentDisparity - latestDisparity < 0) newerIsBetter = false; //the latest has more length disparity (and is less desirable).
+        newerIsBetter = newerIsBetter || currentLedsDisparity >= latestLedsDisparity;
       }
 
       if (newerIsBetter) {
@@ -391,6 +372,32 @@ export class Orb {
         console.log('set new best path: ', this.bestPath);
       }
     }
+  }
+
+  numberOfLedsDisparity(path: number[][]): number {
+    var minLeds, maxLeds = 0;
+    path.forEach((channel) => {
+      var ledsInChannel = this.ledsInChannelPath(channel);
+      if (minLeds > ledsInChannel) minLeds = ledsInChannel;
+      if (maxLeds < ledsInChannel) maxLeds = ledsInChannel;
+    })
+
+    return maxLeds - minLeds;
+  }
+
+  pathLengthDisparity(path: number[][]): number {
+    let maxCurrentLength = 0;
+    let minCurrentLength = 0;
+
+    maxCurrentLength = _.reduce(path, function (max, n) {
+      return Math.max(max, n.length);
+    }, maxCurrentLength);
+
+    maxCurrentLength = _.reduce(path, function (min, n) {
+      return Math.min(min, n.length);
+    }, minCurrentLength);
+
+    return maxCurrentLength - minCurrentLength;
   }
 
   getPaths(startingNodeIdx: number = -1): number[][] {
@@ -477,6 +484,12 @@ export class Orb {
   unLit() {
     return this.segments.filter((s) => !s.lit)
   }
+
+  ledsInChannelPath(path: number[]) {
+    var segments = path.map(sId => this.segments[sId]);
+    return _.sumBy(segments, "leds");
+  }
+
 }
 
 export class OrbNode {
