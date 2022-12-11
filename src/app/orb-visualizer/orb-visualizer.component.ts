@@ -10,6 +10,10 @@ import * as THREE from "three";
 export class OrbVisualizerComponent implements OnInit, AfterViewInit {
   @ViewChild('canvas')
   private canvasRef: ElementRef;
+  
+  private get canvas() {
+    return this.canvasRef.nativeElement;
+  }
 
   @Input() public segments: OrbSegment[];
   @Input() public nodes: OrbNode[];
@@ -17,18 +21,25 @@ export class OrbVisualizerComponent implements OnInit, AfterViewInit {
   levelHeight: number = 50;
   levelVarianceHeight: number = 3;
 
-  private ctx: CanvasRenderingContext2D;
+  //private ctx: THREE.WebGL1Renderer.CanvasRenderingContext2D;
 
-  constructor() {
-  }
+
 
   ngOnInit(): void {
   }
 
   ngAfterViewInit(): void {
-
+    this.createScene();
+    this.startRenderingLoop();
   }
 
+  private createScene(){}
+
+  private startRenderingLoop(){}
+
+  private getAspectRatio() {
+    return this.canvas.clientWidth / this.canvas.clientHeight;
+  }
 
   drawOrb(orb: Orb) {
 

@@ -17,9 +17,8 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2022",
-    "module": "es2020",
-    "types":[],
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    "module": "es2022",    
+    "lib": ["es2022", "dom",]
     
   },
   "angularCompilerOptions": {
