@@ -380,8 +380,8 @@ export class Orb {
         console.log(`
           current total lit LEDs = ${totalLitLeds}, 
           previous total lit LEDs: ${this.mostLitLeds},
-          previousDisparity (distance from perfect): ${this.averageDisparity}.  
-          current Disparity: ${latestAvgDisparity}.  
+          previous disparity (distance from perfect): ${this.averageDisparity}.  
+          current disparity: ${latestAvgDisparity}.  
           We ${(!newerIsBetter ? "do not " : "")} have a new champ.`);
       }
 
