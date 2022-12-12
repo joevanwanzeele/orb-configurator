@@ -382,7 +382,7 @@ export class Orb {
           previous total lit LEDs: ${this.mostLitLeds},
           previous disparity (distance from perfect): ${this.averageDisparity}.  
           current disparity: ${latestAvgDisparity}.  
-          We ${(!newerIsBetter ? "do not " : "")} have a new champ.`);
+          We ${(!newerIsBetter ? "do not " : "")}have a new champ.`);
       }
 
       if (newerIsBetter) {
