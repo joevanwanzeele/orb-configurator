@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 //import { WorkerClient, WorkerManager } from 'angular-web-worker/angular';
 import * as _ from 'lodash';
+import { Subscription } from 'rxjs';
 import { Orb } from '../app/models/orb.model';
 //import { OrbWorker } from './orb.worker';
 
@@ -9,7 +10,7 @@ import { Orb } from '../app/models/orb.model';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit {  
+export class AppComponent implements OnInit {
   orb = new Orb();
   startingNode1 = 1;
   startingNode2 = 9;
@@ -17,7 +18,10 @@ export class AppComponent implements OnInit {
   startingNode4 = 14;
   randomStartNode = false;
   maxAttempts = 15000;
-  attempts = 0;
+  get attempts(): number { return this.orb.attemptTally }
+
+  newBestSub: Subscription;
+  isItRunningSub: Subscription;
   totalUntilBest = 0;
   score = 0;
   title = 'brute force orb path finder.';
@@ -35,31 +39,28 @@ export class AppComponent implements OnInit {
 
   setNewBest(newBestPath: Map<number, number[][]>) {
     if (newBestPath == null) return;
-    console.log("setting new best ", newBestPath);
+    console.log(`setting new best.  Total lit LEDs: ${this.orb.totalLitLeds()}.  Average disparity: ${this.orb.averageDisparity}`);
     //this.bestPaths = newBestPath;
     this.bestPaths.clear(); //setting values (instead of object) his way in order to force the ui to dynamically refresh
-    newBestPath.forEach((v,k) => {
-      setTimeout(() => this.bestPaths.set(k, v));      
+    newBestPath.forEach((v, k) => {
+      setTimeout(() => this.bestPaths.set(k, v));
     });
-    
+
     this.allLit = this.orb.allLit();
     this.unlitSegments = this.orb.fewestUnlit;
     var unlitOrbSegments = this.unlitSegments.map(sId => this.orb.segments[sId]);
     this.totalUnlitLeds = _.sumBy(unlitOrbSegments, "leds");
-    this.attempts += this.maxAttempts;
+    //this.attempts += this.maxAttempts;
     //console.log("so... attempts should equal maxattempts now, which equals ", this.maxAttempts)
     this.totalUntilBest = this.orb.attemptTally;
   }
 
   ngOnInit(): void {
-    this.orb.$running.subscribe(running => {
-      this.generating = running;
-      if (!running) {
-        this.attempts = this.maxAttempts;
-      }
-    });
+    this.newBestSub = this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
 
-    this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
+    this.isItRunningSub = this.orb.$running.subscribe(running => {
+      this.generating = running;
+    });    
   }
 
   resetOrb() {
@@ -77,9 +78,9 @@ export class AppComponent implements OnInit {
     console.log('segments: ', this.orb.segments);
   }
 
-  totalLedsInChannel(startNodeId: number){
+  totalLedsInChannel(startNodeId: number) {
     var total = 0;
-    this.bestPaths.get(startNodeId).forEach((channel, idx) => {      
+    this.bestPaths.get(startNodeId).forEach((channel, idx) => {
       total += this.totalLedsInChannelPath(startNodeId, idx);
     })
     return total;
@@ -102,14 +103,14 @@ export class AppComponent implements OnInit {
     //_worker.postMessage({ maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4]});    
     //console.log("called webworker");
     //_worker.postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] });
-   
+
 
     //await this.client.call(w => w.runCheckPaths(this.orb, this.maxAttempts, [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4]));
 
     //postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] });
 
     setTimeout(async () => {
-      await this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts);  
+      await this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts);
     }, 100);
   }
 }

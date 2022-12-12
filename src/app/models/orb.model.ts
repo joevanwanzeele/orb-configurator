@@ -355,9 +355,10 @@ export class Orb {
 
     if (totalLitLeds >= this.mostLitLeds) {
       // may be a new best path
-      var newContender = new Map<number, number[][]>()
-      var latestAvgDisparity = 0.0;
+      var averages = startingNodeIds.map(nId => this.numberOfLedsDisparity(this.getPathsForController(nId)));
+      var latestAvgDisparity = (_.sum(averages) / averages.length);
 
+      var newContender = new Map<number, number[][]>()
       startingNodeIds.forEach(nId => {
         newContender.set(nId, this.getPathsForController(nId));
       });
@@ -366,14 +367,11 @@ export class Orb {
       if (totalLitLeds == this.mostLitLeds) {
         console.log("equal number of lit leds, comparing disparity")
         //they're equal
-        //let's also score them based on their relative length similarity
-        //var currentDisparity = this.pathLengthDisparity(this.bestPath);
-        //var latestDisparity = this.pathLengthDisparity(newContender);
-
+        //let's also score them based on their relative distance from the ideal length.. currently 1440 per controller/number of channels
+        // todo.. get rid of that magic number..
         //newerIsBetter = currentDisparity >= latestDisparity; //the latest has more length disparity (and is less desirable).
-        var averages = startingNodeIds.map(nId => this.numberOfLedsDisparity(this.getPathsForController(nId)));
-        latestAvgDisparity = (_.sum(averages) / averages.length);
-        if (this.averageDisparity == null || this.averageDisparity <= 0 || latestAvgDisparity <= this.averageDisparity) {
+        
+        if (this.averageDisparity <= 0 || latestAvgDisparity <= this.averageDisparity) {
           newerIsBetter = true;
         } else {
           newerIsBetter = false;
@@ -407,8 +405,6 @@ export class Orb {
   }
 
   numberOfLedsDisparity(path: number[][], idealChannelLength = 1440 / 4): number {
-    var minLeds = 0;
-    var maxLeds = 0;
     var avgDistance = -1;
     path.forEach((channel) => {
       var ledsInChannel = this.ledsInChannelPath(channel);
