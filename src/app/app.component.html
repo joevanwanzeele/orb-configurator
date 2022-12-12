@@ -11,36 +11,37 @@
       <mat-card-title>Parameters</mat-card-title>
       <mat-card-content>
         <form>
-          <mat-form-field appearance="fill">
+          <mat-form-field class="controller-input" appearance="fill">
             <mat-label>Controller 1 node</mat-label>
             <input matInput type="number" [(ngModel)]="startingNode1" name="startingNode1">
           </mat-form-field>
-          <mat-form-field appearance="fill">
+          <mat-form-field class="controller-input" appearance="fill">
             <mat-label>Controller 2 node</mat-label>
             <input matInput type="number" [(ngModel)]="startingNode2" name="startingNode2">
           </mat-form-field>
-          <mat-form-field appearance="fill">
+          <mat-form-field class="controller-input" appearance="fill">
             <mat-label>Controller 3 node</mat-label>
             <input matInput type="number" [(ngModel)]="startingNode3" name="startingNode3">
           </mat-form-field>
-          <mat-form-field appearance="fill">
+          <mat-form-field class="controller-input" appearance="fill">
             <mat-label>Controller 4 node</mat-label>
             <input matInput type="number" [(ngModel)]="startingNode4" name="startingNode4">
           </mat-form-field>
-          <mat-form-field appearance="fill">
+          <mat-form-field class="controller-input" appearance="fill">
             <mat-label>Maximum attempts</mat-label>
             <input matInput type="number" [(ngModel)]="maxAttempts" name="maxAttempts">
           </mat-form-field>
         </form>
       </mat-card-content>
-      <mat-divider inset></mat-divider>
-      <mat-card-actions *ngIf="!generating" color="accent">
-        <button mat-button (click)="findSolution()" [disabled]="generating">GENERATE AND EVALUATE</button>
+      <mat-divider></mat-divider>
+      <mat-card-actions color="accent" class="action-buttons-container">
         <button mat-button (click)="resetOrb()" [disabled]="generating">RESET</button>
+        <button mat-button (click)="findSolution()" [disabled]="generating">GENERATE AND EVALUATE</button>
       </mat-card-actions>
       <mat-card-footer>
-        <h4 *ngIf="attempts > 0 && !generating">{{attempts}} patterns evaluated this run.</h4>
-        <h4 *ngIf="orb.attemptTally > 0 && !generating">{{orb.attemptTally}} total patterns evaluated.</h4>
+        <h4 *ngIf="attempts > 0 && !generating">{{attempts}} patterns evaluated in {{orb.lastRunDuration / 1000 | number:'1.0-1'}} seconds last run.</h4>
+        <h4 *ngIf="orb.attemptTally > 0">{{orb.attemptTally}} total patterns evaluated.</h4>
+        <h4 *ngIf="orb.avgMsPerCheck > 0">{{1000/orb.avgMsPerCheck | number:'1.0-0'}} patterns evaluated per second.</h4>
         <mat-progress-bar *ngIf="generating" mode="indeterminate"></mat-progress-bar>
       </mat-card-footer>
     </mat-card>
@@ -48,11 +49,12 @@
     <mat-card *ngIf="orb.attemptTally > 0">
       <mat-card-title>Best effort</mat-card-title>
       <mat-card-subtitle class="result-label">{{maxLit}}/{{orb.segments.length}} powered segments.</mat-card-subtitle>
-      <mat-progress-bar mode="determinate" color="warn" [value]="(maxLit / orb.segments.length * 100)"></mat-progress-bar>
+      <mat-progress-bar mode="determinate" [color]="(maxLit == orb.segments.length ? 'primary' : 'warn')" [value]="(maxLit / orb.segments.length * 100)"></mat-progress-bar>
       <mat-card-subtitle class="result-label">Found after {{orb.attemptsUntilBest}} attempts.</mat-card-subtitle>
 
       <mat-card-content>
-        <div *ngFor="let startNode of bestPaths | keyvalue">
+        <div class="wide-display">
+        <div *ngFor="let startNode of bestPaths | keyvalue" class="flex-card">
           <mat-list role="list">
             <h3>Controller at node {{startNode.key}}</h3>
             <h5>Total LEDs: {{totalLedsInChannel(startNode.key)}}</h5>
@@ -70,6 +72,7 @@
 
           </mat-list>
         </div>
+      </div>
         <mat-divider></mat-divider>
         <div class="unlit-segment-container" *ngIf="unlitSegments.length > 0">
           <div class="mat-title" style="width: 100px;text-align: right;" color="accent">Un-Lit</div>

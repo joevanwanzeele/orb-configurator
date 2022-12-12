@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 //import { WorkerClient, WorkerManager } from 'angular-web-worker/angular';
 import * as _ from 'lodash';
 import { Orb } from '../app/models/orb.model';
@@ -9,7 +9,7 @@ import { Orb } from '../app/models/orb.model';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit {  
   orb = new Orb();
   startingNode1 = 1;
   startingNode2 = 9;
@@ -30,12 +30,18 @@ export class AppComponent implements OnInit {
     return this.orb.totalLit();
   }
   get maxLit(): number {
-    return this.orb.mostLit;
+    return this.orb.mostLitSegments;
   }
 
-  setNewBest(newBestPath) {
+  setNewBest(newBestPath: Map<number, number[][]>) {
+    if (newBestPath == null) return;
     console.log("setting new best ", newBestPath);
-    this.bestPaths = newBestPath;
+    //this.bestPaths = newBestPath;
+    this.bestPaths.clear(); //setting values (instead of object) his way in order to force the ui to dynamically refresh
+    newBestPath.forEach((v,k) => {
+      setTimeout(() => this.bestPaths.set(k, v));      
+    });
+    
     this.allLit = this.orb.allLit();
     this.unlitSegments = this.orb.fewestUnlit;
     var unlitOrbSegments = this.unlitSegments.map(sId => this.orb.segments[sId]);
@@ -56,6 +62,17 @@ export class AppComponent implements OnInit {
     this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
 
   }
+
+  // ngAfterViewInit(): void {
+  //   this.orb.$running.subscribe(running => {
+  //     this.generating = running;
+  //     if (!running) {
+  //       this.attempts = this.maxAttempts;
+  //     }
+  //   });
+
+  //   this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
+  // }
 
   resetOrb() {
     console.log('resetting orb data');
@@ -103,8 +120,9 @@ export class AppComponent implements OnInit {
 
     //postMessage({ orb: this.orb, maxAttempts: this.maxAttempts, startingNodeIds: [this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4] });
 
-    setTimeout(() =>
-      this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts), 100);
+    setTimeout(async () => {
+      await this.orb.findSolution([this.startingNode1, this.startingNode2, this.startingNode3, this.startingNode4], this.maxAttempts);  
+    }, 100);
   }
 }
 

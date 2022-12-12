@@ -17,13 +17,18 @@ body {
   }
 
   mat-card {
-    margin: 3em;
     padding: 2em;
-    width: 80%;
+    max-width: 80%;
+    margin: auto;
+    margin-top: 2em;
   }
 
   .mat-form-field {
     margin-right: 1em;
+  }
+
+  .action-buttons-container{
+    flex-flow: row-reverse;
   }
 
   .pathGroup {
@@ -45,6 +50,10 @@ body {
     top: -2.5em;
   }
 
+  .controller-input{
+    margin:1em;
+  }
+
   .channel-subheader {
     position: absolute;
     font-size: x-small;
@@ -57,4 +66,15 @@ body {
     margin-top: 1em !important;
     position: relative;
     left: 45%;
+  }
+
+  .wide-display{
+    display:flex;
+    flex-flow: row;
+    flex-basis: auto;
+    align-items: flex-start;
+  }
+
+  .flex-card{
+    flex-grow:1;
   }

@@ -2,6 +2,10 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Input } from '
 import { Orb, OrbNode, OrbSegment } from '../models/orb.model';
 import * as THREE from "three";
 
+const MIRROR_PARTS = ["Mirror_-_"];
+const FRAME_PARTS = ["Dome_-_CPF", "Dome_-_CPC", "Dome_-_CPD", "Dome_-_CPE"];
+const PLASTIC_PARTS = ["Bezel", "Way", "CLAMP", "Clamp"];
+
 @Component({
   selector: 'app-orb-visualizer',
   templateUrl: './orb-visualizer.component.html',
