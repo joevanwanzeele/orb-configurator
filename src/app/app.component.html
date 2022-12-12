@@ -39,9 +39,9 @@
         <button mat-button (click)="findSolution()" [disabled]="generating">GENERATE AND EVALUATE</button>
       </mat-card-actions>
       <mat-card-footer>
-        <h4 *ngIf="attempts > 0 && !generating">{{attempts}} patterns evaluated in {{orb.lastRunDuration / 1000 | number:'1.0-1'}} seconds last run.</h4>
-        <h4 *ngIf="orb.attemptTally > 0">{{orb.attemptTally}} total patterns evaluated.</h4>
-        <h4 *ngIf="orb.avgMsPerCheck > 0">{{1000/orb.avgMsPerCheck | number:'1.0-0'}} patterns evaluated per second.</h4>
+        <h4 *ngIf="attempts > 0 && !generating">{{attempts | number:'1.0-1'}} patterns evaluated in {{orb.lastRunDuration / 1000 | number:'1.0-1'}} seconds last run.</h4>
+        <h4 *ngIf="orb.attemptTally > 0">{{orb.attemptTally | number:'1.0-1'}} total patterns evaluated.</h4>
+        <h4 *ngIf="orb.avgMsPerCheck > 0">evaluating {{1000/orb.avgMsPerCheck | number:'1.0-0'}} patterns per second.</h4>
         <mat-progress-bar *ngIf="generating" mode="indeterminate"></mat-progress-bar>
       </mat-card-footer>
     </mat-card>

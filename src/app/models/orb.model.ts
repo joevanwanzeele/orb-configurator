@@ -10,7 +10,7 @@ export class Orb {
   segments: OrbSegment[] = [];
   mostLitSegments: number = 0;
   mostLitLeds: number = 0;
-  bestPath: number[][] = [];
+  //bestPath: number[][] = [];
   bestPaths = new Map<number, number[][]>();
   fewestUnlit: number[] = [];
   startingNodes: number[] = [];
@@ -18,6 +18,7 @@ export class Orb {
   attemptTally = 0;
   avgMsPerCheck = -1;
   lastRunDuration = -1;
+  averageDisparity: number = -1.0;
   $newBestEvent = new BehaviorSubject<any>(null);
   $running = new BehaviorSubject<boolean>(false);
 
@@ -27,7 +28,7 @@ export class Orb {
   }
 
   resetOrb() {
-    this.bestPath = [];
+    //this.bestPath = [];
     this.bestPaths = new Map<number, number[][]>();
     this.fewestUnlit = [];
     this.startingNodes = [];
@@ -288,18 +289,18 @@ export class Orb {
       var endtime = performance.now();
       var snapshotDuration = endtime - starttime;
       //console.log(`completed in ${snapshotDuration} milliseconds"`)
-      this.avgMsPerCheck = this.avgMsPerCheck == -1 ? snapshotDuration : 
+      this.avgMsPerCheck = this.avgMsPerCheck == -1 ? snapshotDuration :
         (this.avgMsPerCheck + snapshotDuration) / 2; // calculate running average
     }
   }
 
   async findSolution(startingNodeIds: number[], maxAttempts: number) {
     this.$running.next(true);
-    
+
     var starttime = performance.now();
     //console.log('getting ready to wait.. ');
     await this.runit(maxAttempts, startingNodeIds);
-    
+
     var endtime = performance.now();
 
     this.lastRunDuration = endtime - starttime;
@@ -350,14 +351,16 @@ export class Orb {
       nextSegmentId = next[1];
     }
 
-    //var total = this.totalLit();
     var totalLitLeds = this.totalLitLeds();
-    //console.log("comparing solutions.. ");
-    //console.log("previous best: ", this.mostLit);
-    //console.log("current result: ", total);
+
     if (totalLitLeds >= this.mostLitLeds) {
-      //new best path
-      var newContender = this.getPaths();
+      // may be a new best path
+      var newContender = new Map<number, number[][]>()
+      var latestAvgDisparity = 0.0;
+
+      startingNodeIds.forEach(nId => {
+        newContender.set(nId, this.getPathsForController(nId));
+      });
       var newerIsBetter = true;
 
       if (totalLitLeds == this.mostLitLeds) {
@@ -368,46 +371,57 @@ export class Orb {
         //var latestDisparity = this.pathLengthDisparity(newContender);
 
         //newerIsBetter = currentDisparity >= latestDisparity; //the latest has more length disparity (and is less desirable).
+        var averages = startingNodeIds.map(nId => this.numberOfLedsDisparity(this.getPathsForController(nId)));
+        latestAvgDisparity = (_.sum(averages) / averages.length);
+        if (this.averageDisparity == null || this.averageDisparity <= 0 || latestAvgDisparity <= this.averageDisparity) {
+          newerIsBetter = true;
+        } else {
+          newerIsBetter = false;
+        }
 
-        var currentLedsDisparity = this.numberOfLedsDisparity(this.bestPath);
-        var latestLedsDisparity = this.numberOfLedsDisparity(newContender);
-
-        newerIsBetter = currentLedsDisparity >= latestLedsDisparity;
+        console.log(`
+          current total lit LEDs = ${totalLitLeds}, 
+          previous total lit LEDs: ${this.mostLitLeds},
+          previousDisparity (distance from perfect): ${this.averageDisparity}.  
+          current Disparity: ${latestAvgDisparity}.  
+          We ${(!newerIsBetter ? "do not " : "")} have a new champ.`);
       }
 
       if (newerIsBetter) {
+        this.averageDisparity = latestAvgDisparity;
         this.mostLitSegments = this.totalLit();
         this.mostLitLeds = totalLitLeds;
-        this.bestPath = newContender;
-        this.bestPaths = new Map<number, number[][]>();
+        //this.bestPath = _.cloneDeep(newContender);
+        this.bestPaths = newContender;
 
         startingNodeIds.forEach(nId => {
-          this.bestPaths.set(nId, this.getPaths(nId));
+          this.bestPaths.set(nId, this.getPathsForController(nId));
         });
 
         this.fewestUnlit = this.unLit().map(u => u.id);
 
         this.$newBestEvent.next(this.bestPaths)
         this.attemptsUntilBest = this.attemptTally;
-        console.log('set new best path: ', this.bestPath);
       }
     }
   }
 
-  numberOfLedsDisparity(path: number[][]): number {
-    var minLeds, maxLeds = 0;
+  numberOfLedsDisparity(path: number[][], idealChannelLength = 1440 / 4): number {
+    var minLeds = 0;
+    var maxLeds = 0;
+    var avgDistance = -1;
     path.forEach((channel) => {
       var ledsInChannel = this.ledsInChannelPath(channel);
-      if (minLeds > ledsInChannel) minLeds = ledsInChannel;
-      if (maxLeds < ledsInChannel) maxLeds = ledsInChannel;
-    })
+      var distance = Math.abs(ledsInChannel - idealChannelLength);
+      avgDistance = avgDistance == -1 ? distance : (distance + avgDistance) / 2;
+    });
 
-    return maxLeds - minLeds;
+    return avgDistance;
+    //console.log(`getting led disparty for ${path}.  min = ${minLeds}, max = ${maxLeds}.  Disparity = ${maxLeds - minLeds}`);
+    //return maxLeds - minLeds;
   }
 
-  totalLedsForController(path: number[][], controllerId: number){
 
-  }
 
   pathLengthDisparity(path: number[][]): number {
     let maxCurrentLength = 0;
@@ -424,7 +438,9 @@ export class Orb {
     return maxCurrentLength - minCurrentLength;
   }
 
-  getPaths(startingNodeIdx: number = -1): number[][] {
+  
+
+  getPathsForController(startingNodeIdx: number = -1): number[][] {
     var fullPath: number[][] = [];
     var startingSegments: OrbSegment[] = [];
 
@@ -514,11 +530,11 @@ export class Orb {
     return _.sumBy(segments, "leds");
   }
 
-  totalLitLeds():number {
+  totalLitLeds(): number {
     let litSegs = this.segments.filter((s) => s.lit);
     return _.sumBy(litSegs, "leds");
   }
-  
+
 }
 
 export class OrbNode {

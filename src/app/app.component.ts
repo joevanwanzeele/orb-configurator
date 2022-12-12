@@ -16,7 +16,7 @@ export class AppComponent implements OnInit {
   startingNode3 = 4;
   startingNode4 = 14;
   randomStartNode = false;
-  maxAttempts = 5000;
+  maxAttempts = 15000;
   attempts = 0;
   totalUntilBest = 0;
   score = 0;
@@ -60,19 +60,7 @@ export class AppComponent implements OnInit {
     });
 
     this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
-
   }
-
-  // ngAfterViewInit(): void {
-  //   this.orb.$running.subscribe(running => {
-  //     this.generating = running;
-  //     if (!running) {
-  //       this.attempts = this.maxAttempts;
-  //     }
-  //   });
-
-  //   this.orb.$newBestEvent.subscribe(this.setNewBest.bind(this));
-  // }
 
   resetOrb() {
     console.log('resetting orb data');
