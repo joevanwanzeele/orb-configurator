@@ -409,7 +409,8 @@ export class Orb {
     path.forEach((channel) => {
       var ledsInChannel = this.ledsInChannelPath(channel);
       var distance = Math.abs(ledsInChannel - idealChannelLength);
-      avgDistance = avgDistance == -1 ? distance : (distance + avgDistance) / 2;
+      distance = Math.pow(distance, 2);
+      avgDistance = avgDistance == -1 ?  distance : (distance + avgDistance) / 2;
     });
 
     return avgDistance;
